@@ -54,18 +54,19 @@ export const BabyStoreCalculatorWithSupabase = () => {
   // Calcular precios cuando cambian los valores
   useEffect(() => {
     if (productoActual.costoCompra || productoActual.margenDeseado) {
-      const { precioVenta, utilidad } = calcularPrecios(productoActual, configuracion);
+      const { precioVenta, utilidad, costoUnitario } = calcularPrecios(productoActual, configuracion);
       setProductoActual(prev => ({
         ...prev,
         precioVenta: precioVenta.toString(),
-        utilidad: utilidad.toString()
+        utilidad: utilidad.toString(),
+        costoUnitario: costoUnitario.toString()
       }));
     }
-  }, [productoActual.costoCompra, productoActual.gastosFijos, productoActual.margenDeseado, configuracion]);
+  }, [productoActual.costoCompra, productoActual.gastosFijos, productoActual.margenDeseado, productoActual.esPaquete, productoActual.unidadesPorPaquete, configuracion]);
 
   const manejarCambioInput = (campo: keyof ProductoActual, valor: string) => {
     // Para campos numéricos, usamos el hook especializado
-    const camposNumericos = ['costoCompra', 'gastosFijos', 'stock', 'ventasUltimos30Dias', 'precioCompetencia'];
+    const camposNumericos = ['costoCompra', 'gastosFijos', 'stock', 'ventasUltimos30Dias', 'precioCompetencia', 'unidadesPorPaquete'];
     
     if (camposNumericos.includes(campo)) {
       manejarCambioNumerico(valor, (valorLimpio) => {
@@ -74,6 +75,15 @@ export const BabyStoreCalculatorWithSupabase = () => {
           [campo]: valorLimpio
         }));
       });
+    } else if (campo === 'esPaquete') {
+      // Manejar el campo booleano
+      const esTrue = valor === 'true';
+      setProductoActual(prev => ({
+        ...prev,
+        [campo]: esTrue,
+        // Si se desactiva el paquete, resetear unidades a 1
+        unidadesPorPaquete: esTrue ? prev.unidadesPorPaquete : '1'
+      }));
     } else {
       setProductoActual(prev => ({
         ...prev,

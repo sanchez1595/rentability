@@ -124,6 +124,59 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
               />
             </div>
           </div>
+
+          {/* Configuración de Paquetes */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-amber-800 mb-3">Configuración de Paquetes</h3>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="esPaquete"
+                  checked={productoActual.esPaquete}
+                  onChange={(e) => onCambioInput('esPaquete', e.target.checked.toString())}
+                  className="w-5 h-5 text-amber-600 border-amber-300 rounded focus:ring-amber-500"
+                />
+                <label htmlFor="esPaquete" className="text-sm font-medium text-amber-700">
+                  Este producto viene en paquete (voy a venderlo por unidades)
+                </label>
+              </div>
+              
+              {productoActual.esPaquete && (
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-amber-700 mb-2">
+                      Unidades por Paquete
+                    </label>
+                    <input
+                      type="text"
+                      value={formatearInput(productoActual.unidadesPorPaquete)}
+                      onChange={(e) => onCambioInput('unidadesPorPaquete', e.target.value)}
+                      className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
+                      placeholder="Ej: 6 pares"
+                    />
+                    <p className="text-xs text-amber-600 mt-1">
+                      ¿Cuántas unidades vienen en cada paquete que compras?
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-amber-700 mb-2">
+                      Costo por Unidad
+                    </label>
+                    <div className="px-3 py-2 bg-amber-100 border border-amber-300 rounded-lg text-amber-800 font-medium">
+                      {productoActual.costoUnitario && parseFloat(productoActual.costoUnitario) > 0
+                        ? `$${formatearInput(productoActual.costoUnitario)}`
+                        : 'Calculado automáticamente'}
+                    </div>
+                    <p className="text-xs text-amber-600 mt-1">
+                      Se calcula dividiendo el costo total entre las unidades
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="grid md:grid-cols-2 gap-4">
             <div>
@@ -191,10 +244,45 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
         </div>
         
         <div className="space-y-4">
+          {/* Información de Paquete */}
+          {productoActual.esPaquete && productoActual.unidadesPorPaquete && parseFloat(productoActual.unidadesPorPaquete) > 1 && (
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+              <div className="text-sm font-medium text-amber-700 mb-2">División por Paquete</div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-amber-600">Costo del paquete:</span>
+                  <div className="font-bold text-amber-800">
+                    {productoActual.costoCompra && parseFloat(productoActual.costoCompra) > 0
+                      ? `$${formatearNumero(parseFloat(productoActual.costoCompra).toFixed(0))}`
+                      : '-'}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-amber-600">Unidades:</span>
+                  <div className="font-bold text-amber-800">
+                    {formatearInput(productoActual.unidadesPorPaquete)} unidades
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-amber-600">Costo por unidad:</span>
+                  <div className="font-bold text-amber-800 text-lg">
+                    {productoActual.costoUnitario && parseFloat(productoActual.costoUnitario) > 0
+                      ? `$${formatearNumero(parseFloat(productoActual.costoUnitario).toFixed(0))}`
+                      : '-'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm font-medium text-slate-600">Costo Base del Producto</div>
+            <div className="text-sm font-medium text-slate-600">
+              {productoActual.esPaquete ? 'Costo Base por Unidad' : 'Costo Base del Producto'}
+            </div>
             <div className="text-xl font-bold text-slate-800">
-              {productoActual.costoCompra && parseFloat(productoActual.costoCompra) > 0
+              {productoActual.esPaquete && productoActual.costoUnitario && parseFloat(productoActual.costoUnitario) > 0
+                ? `$${formatearNumero(parseFloat(productoActual.costoUnitario).toFixed(0))}`
+                : productoActual.costoCompra && parseFloat(productoActual.costoCompra) > 0
                 ? `$${formatearNumero(parseFloat(productoActual.costoCompra).toFixed(0))}`
                 : '-'}
             </div>

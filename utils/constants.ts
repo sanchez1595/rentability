@@ -65,7 +65,10 @@ export const PRODUCTO_INICIAL = {
   ventasUltimos30Dias: '',
   precioCompetencia: '',
   fechaUltimaVenta: '',
-  rotacion: 'alta' as const
+  rotacion: 'alta' as const,
+  esPaquete: false,
+  unidadesPorPaquete: '1',
+  costoUnitario: ''
 };
 
 export const VENTA_INICIAL = {

@@ -12,6 +12,9 @@ export interface Producto {
   precioCompetencia: string;
   fechaUltimaVenta: string;
   rotacion: string;
+  esPaquete: boolean;
+  unidadesPorPaquete: string;
+  costoUnitario: string;
 }
 
 export interface Venta {
@@ -50,6 +53,9 @@ export interface ProductoActual {
   precioCompetencia: string;
   fechaUltimaVenta: string;
   rotacion: string;
+  esPaquete: boolean;
+  unidadesPorPaquete: string;
+  costoUnitario: string;
 }
 
 export interface Metas {

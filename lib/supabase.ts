@@ -20,6 +20,9 @@ export interface ProductoDB {
   precio_competencia: number;
   fecha_ultima_venta: string | null;
   rotacion: string;
+  es_paquete?: boolean;
+  unidades_por_paquete?: number;
+  costo_unitario?: number;
   created_at?: string;
   updated_at?: string;
 }

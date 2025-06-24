@@ -1,7 +1,8 @@
 import React from 'react';
-import { ShoppingCart, Calendar, CheckCircle, Clock, Package, BarChart3, Trash2 } from 'lucide-react';
+import { ShoppingCart, Calendar, CheckCircle, Clock, Package, BarChart3, Trash2, Plus } from 'lucide-react';
 import { Producto, Venta, VentaActual } from '../../types';
 import { formatearInput, formatearMoneda } from '../../utils/formatters';
+import { Combobox } from '../common/Combobox';
 
 interface GestionVentasProps {
   productos: Producto[];
@@ -27,9 +28,26 @@ export const GestionVentas: React.FC<GestionVentasProps> = ({
   };
 
   const parsearInput = (valor: string) => {
-    if (!valor) return '';
-    const soloNumeros = valor.toString().replace(/\D/g, '');
-    return soloNumeros ? parseInt(soloNumeros) : '';
+    return valor.replace(/[^\d]/g, '');
+  };
+
+  // Preparar opciones para el combobox
+  const opcionesProductos = productos
+    .filter(p => (parseFloat(p.stock) || 0) > 0)
+    .map(producto => ({
+      id: producto.id,
+      label: producto.nombre,
+      subtitle: `Stock: ${formatearNumero(producto.stock || '0')} - $${formatearNumero(parseFloat(producto.precioVenta || '0').toFixed(0))}`
+    }));
+
+  const handleProductChange = (productoId: string) => {
+    onActualizarVenta('productoId', productoId);
+    if (productoId) {
+      const producto = productos.find(p => p.id === productoId);
+      if (producto) {
+        onActualizarVenta('precioVenta', producto.precioVenta);
+      }
+    }
   };
 
   return (
@@ -67,26 +85,12 @@ export const GestionVentas: React.FC<GestionVentasProps> = ({
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Producto
                 </label>
-                <select
+                <Combobox
+                  options={opcionesProductos}
                   value={ventaActual.productoId}
-                  onChange={(e) => {
-                    const producto = productos.find(p => p.id == e.target.value);
-                    onActualizarVenta('productoId', e.target.value);
-                    if (producto) {
-                      onActualizarVenta('precioVenta', producto.precioVenta);
-                    }
-                  }}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                >
-                  <option value="">Seleccionar producto...</option>
-                  {productos
-                    .filter(p => (parseFloat(p.stock) || 0) > 0)
-                    .map(producto => (
-                      <option key={producto.id} value={producto.id}>
-                        {producto.nombre} - Stock: {formatearNumero(producto.stock || '0')} - ${formatearNumero(parseFloat(producto.precioVenta || '0').toFixed(0))}
-                      </option>
-                    ))}
-                </select>
+                  onChange={handleProductChange}
+                  placeholder="Buscar producto..."
+                />
               </div>
 
               {/* Info del producto seleccionado */}

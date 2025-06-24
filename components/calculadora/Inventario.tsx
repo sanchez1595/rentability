@@ -1,8 +1,7 @@
 import React from 'react';
-import { Edit2, Trash2, Package, TrendingUp, TrendingDown } from 'lucide-react';
+import { Edit2, Trash2, Package } from 'lucide-react';
 import { Producto, Venta } from '../../types';
-import { formatearNumero, formatearMoneda } from '../../utils/formatters';
-import { calcularVentasReales30Dias } from '../../utils/calculations';
+import { formatearNumero } from '../../utils/formatters';
 
 interface InventarioProps {
   productos: Producto[];
@@ -12,18 +11,6 @@ interface InventarioProps {
 }
 
 export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProducto, onEliminarProducto, ventas }) => {
-  const calcularPuntoEquilibrio = (producto: Producto) => {
-    const costoUnitario = (parseFloat(producto.costoCompra) || 0) + (parseFloat(producto.gastosFijos) || 0);
-    const precioVenta = parseFloat(producto.precioVenta) || 0;
-    const contribucionUnitaria = precioVenta - costoUnitario;
-    
-    if (contribucionUnitaria <= 0) return 'No rentable';
-    
-    // Simplificado para el ejemplo
-    const costosFijos = 2560000; // Ejemplo
-    const unidadesEquilibrio = Math.ceil(costosFijos / contribucionUnitaria);
-    return unidadesEquilibrio;
-  };
 
   return (
     <div className="space-y-6">
@@ -49,37 +36,31 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Producto
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Categoría
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Stock
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Costo
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Precio Venta
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Utilidad
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Margen %
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ventas 30d
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Punto Equilibrio
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -91,8 +72,6 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                   const precio = parseFloat(producto.precioVenta) || 0;
                   const utilidad = parseFloat(producto.utilidad) || 0;
                   const margen = precio > 0 ? ((precio - costo) / precio) * 100 : 0;
-                  const ventasReales = calcularVentasReales30Dias(producto.id, ventas);
-                  const puntoEquilibrio = calcularPuntoEquilibrio(producto);
                   
                   const getEstadoStock = () => {
                     if (stock === 0) return { texto: 'Sin stock', color: 'red' };
@@ -105,54 +84,44 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                   
                   return (
                     <tr key={producto.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">{producto.nombre}</div>
-                          <div className="text-sm text-gray-500">#{producto.id.slice(0, 8)}</div>
+                          <div className="text-xs text-gray-500">#{producto.id.slice(0, 8)}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                      <td className="px-2 py-3 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
                           {producto.categoria}
                         </span>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{formatearNumero(stock)}</div>
-                        <div className={`text-xs text-${estadoStock.color}-600`}>{estadoStock.texto}</div>
+                      <td className="px-2 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 font-medium">{formatearNumero(stock)}</div>
+                        <div className={`text-xs ${
+                          estadoStock.color === 'red' ? 'text-red-600' :
+                          estadoStock.color === 'yellow' ? 'text-yellow-600' :
+                          estadoStock.color === 'blue' ? 'text-blue-600' : 'text-green-600'
+                        }`}>
+                          {estadoStock.texto}
+                        </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         ${formatearNumero(costo)}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                         ${formatearNumero(precio)}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="text-sm font-medium text-green-600">
                           ${formatearNumero(utilidad)}
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className={`text-sm font-medium ${margen >= 30 ? 'text-green-600' : margen >= 20 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      <td className="px-2 py-3 whitespace-nowrap">
+                        <div className={`text-sm font-bold ${margen >= 30 ? 'text-green-600' : margen >= 20 ? 'text-yellow-600' : 'text-red-600'}`}>
                           {margen.toFixed(1)}%
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="text-sm text-gray-900">{ventasReales}</span>
-                          {ventasReales > (parseFloat(producto.ventasUltimos30Dias) || 0) ? (
-                            <TrendingUp className="ml-1 w-4 h-4 text-green-500" />
-                          ) : ventasReales < (parseFloat(producto.ventasUltimos30Dias) || 0) ? (
-                            <TrendingDown className="ml-1 w-4 h-4 text-red-500" />
-                          ) : null}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Estimado: {producto.ventasUltimos30Dias || 0}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {typeof puntoEquilibrio === 'number' ? formatearNumero(puntoEquilibrio) : puntoEquilibrio}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="flex flex-col space-y-1">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             margen >= 30 ? 'bg-green-100 text-green-800' :
@@ -172,11 +141,11 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-1">
                           <button
                             onClick={() => onEditarProducto(producto)}
-                            className="text-blue-600 hover:text-blue-900 transition-colors"
+                            className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors"
                             title="Editar producto"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -187,7 +156,7 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                                 onEliminarProducto(producto.id);
                               }
                             }}
-                            className="text-red-600 hover:text-red-900 transition-colors"
+                            className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
                             title="Eliminar producto"
                           >
                             <Trash2 className="w-4 h-4" />

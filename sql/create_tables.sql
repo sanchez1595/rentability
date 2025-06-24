@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS productos (
   precio_competencia DECIMAL(10, 2) DEFAULT 0,
   fecha_ultima_venta TIMESTAMP,
   rotacion VARCHAR(20) NOT NULL DEFAULT 'media',
+  es_paquete BOOLEAN NOT NULL DEFAULT FALSE,
+  unidades_por_paquete INTEGER NOT NULL DEFAULT 1,
+  costo_unitario DECIMAL(10, 2) NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -78,17 +81,29 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_productos_updated_at BEFORE UPDATE ON productos
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_configuracion_updated_at BEFORE UPDATE ON configuracion
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_metas_updated_at BEFORE UPDATE ON metas
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_alertas_updated_at BEFORE UPDATE ON alertas
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Crear triggers solo si no existen
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_productos_updated_at') THEN
+        CREATE TRIGGER update_productos_updated_at BEFORE UPDATE ON productos
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_configuracion_updated_at') THEN
+        CREATE TRIGGER update_configuracion_updated_at BEFORE UPDATE ON configuracion
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_metas_updated_at') THEN
+        CREATE TRIGGER update_metas_updated_at BEFORE UPDATE ON metas
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_alertas_updated_at') THEN
+        CREATE TRIGGER update_alertas_updated_at BEFORE UPDATE ON alertas
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
 -- Insertar configuración inicial
 INSERT INTO configuracion (tipo, clave, valor) VALUES

@@ -15,7 +15,10 @@ const convertProductoFromDB = (productoDB: ProductoDB): Producto => ({
   ventasUltimos30Dias: productoDB.ventas_ultimos_30_dias.toString(),
   precioCompetencia: productoDB.precio_competencia.toString(),
   fechaUltimaVenta: productoDB.fecha_ultima_venta || '',
-  rotacion: productoDB.rotacion
+  rotacion: productoDB.rotacion,
+  esPaquete: productoDB.es_paquete || false,
+  unidadesPorPaquete: (productoDB.unidades_por_paquete || 1).toString(),
+  costoUnitario: (productoDB.costo_unitario || 0).toString()
 });
 
 const convertProductoToDB = (producto: Producto): Omit<ProductoDB, 'id' | 'created_at' | 'updated_at'> => ({
@@ -30,7 +33,10 @@ const convertProductoToDB = (producto: Producto): Omit<ProductoDB, 'id' | 'creat
   ventas_ultimos_30_dias: parseInt(producto.ventasUltimos30Dias) || 0,
   precio_competencia: parseFloat(producto.precioCompetencia) || 0,
   fecha_ultima_venta: producto.fechaUltimaVenta || null,
-  rotacion: producto.rotacion
+  rotacion: producto.rotacion,
+  es_paquete: producto.esPaquete || false,
+  unidades_por_paquete: parseInt(producto.unidadesPorPaquete) || 1,
+  costo_unitario: parseFloat(producto.costoUnitario) || 0
 });
 
 const convertVentaFromDB = (ventaDB: VentaDB): Venta => ({
@@ -100,6 +106,9 @@ export const productosService = {
     if (producto.precioCompetencia !== undefined) updates.precio_competencia = parseFloat(producto.precioCompetencia) || 0;
     if (producto.fechaUltimaVenta !== undefined) updates.fecha_ultima_venta = producto.fechaUltimaVenta || null;
     if (producto.rotacion !== undefined) updates.rotacion = producto.rotacion;
+    if (producto.esPaquete !== undefined) updates.es_paquete = producto.esPaquete;
+    if (producto.unidadesPorPaquete !== undefined) updates.unidades_por_paquete = parseInt(producto.unidadesPorPaquete) || 1;
+    if (producto.costoUnitario !== undefined) updates.costo_unitario = parseFloat(producto.costoUnitario) || 0;
     
     const { data, error } = await supabase
       .from('productos')
