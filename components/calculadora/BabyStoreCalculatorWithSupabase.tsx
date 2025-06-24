@@ -72,7 +72,9 @@ export const BabyStoreCalculatorWithSupabase = () => {
       manejarCambioNumerico(valor, (valorLimpio) => {
         setProductoActual(prev => ({
           ...prev,
-          [campo]: valorLimpio
+          [campo]: valorLimpio,
+          // Si es unidadesPorPaquete y es un paquete, actualizar el stock automáticamente
+          ...(campo === 'unidadesPorPaquete' && prev.esPaquete ? { stock: valorLimpio } : {})
         }));
       });
     } else if (campo === 'esPaquete') {
@@ -81,8 +83,10 @@ export const BabyStoreCalculatorWithSupabase = () => {
       setProductoActual(prev => ({
         ...prev,
         [campo]: esTrue,
-        // Si se desactiva el paquete, resetear unidades a 1
-        unidadesPorPaquete: esTrue ? prev.unidadesPorPaquete : '1'
+        // Si se desactiva el paquete, resetear unidades a 1 y stock a 0
+        // Si se activa el paquete, establecer stock a las unidades por paquete
+        unidadesPorPaquete: esTrue ? prev.unidadesPorPaquete : '1',
+        stock: esTrue ? prev.unidadesPorPaquete || '1' : '0'
       }));
     } else {
       setProductoActual(prev => ({

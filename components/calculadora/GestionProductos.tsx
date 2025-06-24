@@ -64,68 +64,8 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
               placeholder="Ej: Pañales Huggies Talla M"
             />
           </div>
-          
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Categoría
-              </label>
-              <select
-                value={productoActual.categoria}
-                onChange={(e) => onCambioInput('categoria', e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              >
-                {CATEGORIAS.map(cat => (
-                  <option key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Stock Inicial
-              </label>
-              <input
-                type="text"
-                value={formatearInput(productoActual.stock)}
-                onChange={(e) => onCambioInput('stock', e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="0"
-              />
-            </div>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Costo de Compra ($)
-              </label>
-              <input
-                type="text"
-                value={formatearInput(productoActual.costoCompra)}
-                onChange={(e) => onCambioInput('costoCompra', e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="0"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Gastos Fijos Asignados ($)
-              </label>
-              <input
-                type="text"
-                value={formatearInput(productoActual.gastosFijos)}
-                onChange={(e) => onCambioInput('gastosFijos', e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="0"
-              />
-            </div>
-          </div>
 
-          {/* Configuración de Paquetes */}
+          {/* Configuración de Paquetes - Movido aquí para mejor flujo */}
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-amber-800 mb-3">Configuración de Paquetes</h3>
             <div className="space-y-4">
@@ -177,6 +117,74 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
               )}
             </div>
           </div>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Categoría
+              </label>
+              <select
+                value={productoActual.categoria}
+                onChange={(e) => onCambioInput('categoria', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              >
+                {CATEGORIAS.map(cat => (
+                  <option key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Stock Inicial {productoActual.esPaquete ? '(unidades individuales)' : ''}
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.stock)}
+                onChange={(e) => onCambioInput('stock', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder={productoActual.esPaquete ? `Ej: ${productoActual.unidadesPorPaquete || '6'} unidades` : "0"}
+                disabled={productoActual.esPaquete && !!productoActual.unidadesPorPaquete}
+              />
+              {productoActual.esPaquete && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Se establecerá automáticamente al número de unidades por paquete
+                </p>
+              )}
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Costo de Compra ($)
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.costoCompra)}
+                onChange={(e) => onCambioInput('costoCompra', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Gastos Fijos Asignados ($)
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.gastosFijos)}
+                onChange={(e) => onCambioInput('gastosFijos', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+
           
           <div className="grid md:grid-cols-2 gap-4">
             <div>
