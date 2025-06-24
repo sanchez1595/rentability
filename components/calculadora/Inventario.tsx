@@ -68,10 +68,13 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
               <tbody className="bg-white divide-y divide-gray-200">
                 {productos.map((producto) => {
                   const stock = parseFloat(producto.stock) || 0;
-                  const costo = parseFloat(producto.costoCompra) || 0;
+                  // Para paquetes, usar el costo unitario real, no el costo del paquete completo
+                  const costoReal = producto.esPaquete && producto.costoUnitario 
+                    ? parseFloat(producto.costoUnitario) 
+                    : parseFloat(producto.costoCompra) || 0;
                   const precio = parseFloat(producto.precioVenta) || 0;
                   const utilidad = parseFloat(producto.utilidad) || 0;
-                  const margen = precio > 0 ? ((precio - costo) / precio) * 100 : 0;
+                  const margen = precio > 0 ? ((precio - costoReal) / precio) * 100 : 0;
                   
                   const getEstadoStock = () => {
                     if (stock === 0) return { texto: 'Sin stock', color: 'red' };
@@ -106,7 +109,12 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                         </div>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
-                        ${formatearNumero(costo)}
+                        ${formatearNumero(costoReal)}
+                        {producto.esPaquete && (
+                          <div className="text-xs text-amber-600">
+                            Por unidad
+                          </div>
+                        )}
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                         ${formatearNumero(precio)}
@@ -200,8 +208,10 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
           <p className="text-2xl font-bold text-green-600">
             {productos.length > 0 ? (productos.reduce((sum, p) => {
               const precio = parseFloat(p.precioVenta) || 0;
-              const costo = parseFloat(p.costoCompra) || 0;
-              return sum + (precio > 0 ? ((precio - costo) / precio) * 100 : 0);
+              const costoReal = p.esPaquete && p.costoUnitario 
+                ? parseFloat(p.costoUnitario) 
+                : parseFloat(p.costoCompra) || 0;
+              return sum + (precio > 0 ? ((precio - costoReal) / precio) * 100 : 0);
             }, 0) / productos.length).toFixed(1) : 0}%
           </p>
         </div>
