@@ -2,6 +2,7 @@ import React from 'react';
 import { Settings, Plus, Trash2, Target, AlertTriangle, DollarSign, X } from 'lucide-react';
 import { Configuracion as ConfiguracionType, Metas, Alertas } from '../../types';
 import { formatearInput, formatearMoneda } from '../../utils/formatters';
+import { useNumericInput } from '../../hooks/useNumericInput';
 
 interface ConfiguracionProps {
   configuracion: ConfiguracionType;
@@ -20,29 +21,29 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
   onActualizarMetas,
   onActualizarAlertas
 }) => {
-  const parsearInput = (valor: string) => {
-    if (!valor) return '';
-    const soloNumeros = valor.toString().replace(/\D/g, '');
-    return soloNumeros ? parseInt(soloNumeros) : '';
-  };
+  const { manejarCambioNumerico } = useNumericInput();
 
   const actualizarCostoFijo = (key: string, valor: string) => {
-    const nuevoValor = parsearInput(valor) || 0;
-    onActualizarConfiguracion({
-      costosFijos: {
-        ...configuracion.costosFijos,
-        [key]: nuevoValor
-      }
+    manejarCambioNumerico(valor, (valorLimpio) => {
+      const nuevoValor = parseInt(valorLimpio) || 0;
+      onActualizarConfiguracion({
+        costosFijos: {
+          ...configuracion.costosFijos,
+          [key]: nuevoValor
+        }
+      });
     });
   };
 
   const actualizarHerramienta = (key: string, valor: string) => {
-    const nuevoValor = parsearInput(valor) || 0;
-    onActualizarConfiguracion({
-      herramientas: {
-        ...configuracion.herramientas,
-        [key]: nuevoValor
-      }
+    manejarCambioNumerico(valor, (valorLimpio) => {
+      const nuevoValor = parseInt(valorLimpio) || 0;
+      onActualizarConfiguracion({
+        herramientas: {
+          ...configuracion.herramientas,
+          [key]: nuevoValor
+        }
+      });
     });
   };
 
@@ -53,6 +54,13 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
         ...configuracion.porcentajes,
         [key]: nuevoValor
       }
+    });
+  };
+
+  const actualizarVentasEstimadas = (valor: string) => {
+    manejarCambioNumerico(valor, (valorLimpio) => {
+      const nuevoValor = parseInt(valorLimpio) || 1;
+      onActualizarConfiguracion({ ventasEstimadas: nuevoValor });
     });
   };
 
@@ -143,7 +151,7 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
           <input
             type="text"
             value={formatearInput(configuracion.ventasEstimadas)}
-            onChange={(e) => onActualizarConfiguracion({ ventasEstimadas: parsearInput(e.target.value) || 1 })}
+            onChange={(e) => actualizarVentasEstimadas(e.target.value)}
             className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             placeholder="100"
           />
@@ -377,7 +385,9 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
               <input
                 type="text"
                 value={formatearInput(metas.ventasMensuales)}
-                onChange={(e) => onActualizarMetas({ ventasMensuales: parseFloat(e.target.value.replace(/\D/g, '')) || 0 })}
+                onChange={(e) => manejarCambioNumerico(e.target.value, (valorLimpio) => {
+                  onActualizarMetas({ ventasMensuales: parseInt(valorLimpio) || 0 });
+                })}
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="2,000,000"
               />
