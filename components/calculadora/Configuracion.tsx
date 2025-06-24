@@ -398,11 +398,13 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
                 Unidades Mensuales Objetivo
               </label>
               <input
-                type="number"
-                value={metas.unidadesMensuales}
-                onChange={(e) => onActualizarMetas({ unidadesMensuales: parseFloat(e.target.value) || 0 })}
+                type="text"
+                value={formatearInput(metas.unidadesMensuales)}
+                onChange={(e) => manejarCambioNumerico(e.target.value, (valorLimpio) => {
+                  onActualizarMetas({ unidadesMensuales: parseInt(valorLimpio) || 0 });
+                })}
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                placeholder="200"
+                placeholder="100"
               />
             </div>
 
@@ -433,6 +435,8 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
                 step="0.1"
               />
             </div>
+
+
           </div>
         </div>
 
@@ -467,10 +471,12 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
                 Stock Mínimo de Alerta
               </label>
               <input
-                type="number"
-                value={alertas.stockMinimo}
-                onChange={(e) => onActualizarAlertas({ stockMinimo: parseFloat(e.target.value) || 0 })}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                type="text"
+                value={formatearInput(alertas.stockMinimo)}
+                onChange={(e) => manejarCambioNumerico(e.target.value, (valorLimpio) => {
+                  onActualizarAlertas({ stockMinimo: parseInt(valorLimpio) || 0 });
+                })}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 placeholder="5"
               />
             </div>
@@ -480,10 +486,12 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
                 Días Sin Venta para Alerta
               </label>
               <input
-                type="number"
-                value={alertas.diasSinVenta}
-                onChange={(e) => onActualizarAlertas({ diasSinVenta: parseFloat(e.target.value) || 0 })}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                type="text"
+                value={formatearInput(alertas.diasSinVenta)}
+                onChange={(e) => manejarCambioNumerico(e.target.value, (valorLimpio) => {
+                  onActualizarAlertas({ diasSinVenta: parseInt(valorLimpio) || 0 });
+                })}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 placeholder="30"
               />
             </div>
