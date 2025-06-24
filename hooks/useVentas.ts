@@ -7,28 +7,49 @@ export const useVentas = () => {
   const [ventaActual, setVentaActual] = useState<VentaActual>(VENTA_INICIAL);
 
   const registrarVenta = useCallback((productos: Producto[]) => {
-    if (!ventaActual.productoId || !ventaActual.cantidad) return false;
-
+    if (!ventaActual.productoId || !ventaActual.cantidad || ventaActual.cantidad === '') return false;
+    
     const producto = productos.find(p => p.id == ventaActual.productoId);
     if (!producto) return false;
-
+    
     const cantidad = parseFloat(ventaActual.cantidad) || 0;
     const stockActual = parseFloat(producto.stock) || 0;
-
+    
     if (cantidad > stockActual) {
-      alert(`No hay suficiente stock. Stock disponible: ${stockActual}`);
+      alert('No hay suficiente stock para esta venta');
       return false;
     }
-
+    
+    // Crear registro de venta exactamente como en el original
     const nuevaVenta: Venta = {
-      ...ventaActual,
       id: Date.now().toString(),
-      producto: producto,
-      total: cantidad * (parseFloat(ventaActual.precioVenta) || 0)
+      productoId: ventaActual.productoId,
+      productoNombre: producto.nombre,
+      cantidad: cantidad,
+      precioVenta: parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0,
+      costoUnitario: parseFloat(producto.costoCompra) || 0,
+      fecha: ventaActual.fecha,
+      cliente: ventaActual.cliente || 'Cliente general',
+      metodoPago: ventaActual.metodoPago,
+      utilidadTotal: ((parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) - (parseFloat(producto.costoCompra) || 0)) * cantidad,
+      ingresoTotal: (parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) * cantidad
     };
-
-    setVentas(prev => [...prev, nuevaVenta]);
-    setVentaActual(VENTA_INICIAL);
+    
+    // Agregar venta al historial
+    setVentas(prev => [nuevaVenta, ...prev]);
+    
+    // Limpiar formulario de venta
+    setVentaActual({
+      productoId: '',
+      cantidad: '',
+      precioVenta: '',
+      fecha: new Date().toISOString().split('T')[0],
+      cliente: '',
+      metodoPago: 'efectivo'
+    });
+    
+    // Mostrar confirmación
+    alert(`¡Venta registrada! ${cantidad} unidades de ${producto.nombre}`);
     return true;
   }, [ventaActual]);
 

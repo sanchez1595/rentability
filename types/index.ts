@@ -17,13 +17,15 @@ export interface Producto {
 export interface Venta {
   id: string;
   productoId: string;
-  cantidad: string;
-  precioVenta: string;
+  productoNombre: string;
+  cantidad: number;
+  precioVenta: number;
+  costoUnitario: number;
   fecha: string;
   cliente: string;
   metodoPago: string;
-  producto?: Producto;
-  total?: number;
+  utilidadTotal: number;
+  ingresoTotal: number;
 }
 
 export interface VentaActual {
@@ -92,7 +94,7 @@ export interface Configuracion {
   ventasEstimadas: number;
 }
 
-export type Vista = 'dashboard' | 'productos' | 'ventas' | 'configuracion';
+export type Vista = 'dashboard' | 'ventas' | 'calculadora' | 'inventario' | 'alertas' | 'abc' | 'simulador' | 'metas' | 'informes' | 'configuracion';
 export type Categoria = 'alimentacion' | 'pañales' | 'ropa' | 'juguetes' | 'higiene' | 'accesorios' | 'mobiliario' | 'otros';
-export type MetodoPago = 'efectivo' | 'tarjeta' | 'transferencia';
+export type MetodoPago = 'efectivo' | 'tarjeta' | 'transferencia' | 'nequi' | 'daviplata';
 export type Rotacion = 'alta' | 'media' | 'baja';

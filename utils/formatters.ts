@@ -6,15 +6,22 @@ export const formatearNumero = (numero: number | string): string => {
 
 export const formatearInput = (valor: string | number): string => {
   if (!valor) return '';
-  const soloNumeros = valor.toString().replace(/\D/g, '');
+  const soloNumeros = valor.toString().replace(/[^\d]/g, '');
   if (!soloNumeros) return '';
-  return new Intl.NumberFormat('es-CO').format(parseInt(soloNumeros));
+  const numero = parseInt(soloNumeros);
+  return new Intl.NumberFormat('es-CO').format(numero);
 };
 
 export const parsearInput = (valor: string | number): string => {
   if (!valor) return '';
-  const soloNumeros = valor.toString().replace(/\D/g, '');
-  return soloNumeros ? parseInt(soloNumeros).toString() : '';
+  const soloNumeros = valor.toString().replace(/[^\d]/g, '');
+  if (!soloNumeros) return '';
+  return soloNumeros;
+};
+
+export const formatearInputSinFormato = (valor: string | number): string => {
+  if (!valor) return '';
+  return valor.toString().replace(/[^\d]/g, '');
 };
 
 export const formatearMoneda = (valor: number | string): string => {

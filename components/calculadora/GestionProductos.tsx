@@ -1,6 +1,6 @@
 import React from 'react';
-import { Edit2, Trash2, Save, X, Calculator, Plus } from 'lucide-react';
-import { Producto, ProductoActual } from '../../types';
+import { Edit2, Trash2, Save, X, Calculator, Plus, TrendingUp } from 'lucide-react';
+import { Producto, ProductoActual, Configuracion } from '../../types';
 import { CATEGORIAS } from '../../utils/constants';
 import { formatearInput, formatearMoneda } from '../../utils/formatters';
 
@@ -15,6 +15,7 @@ interface GestionProductosProps {
   onGuardarEdicion: () => void;
   onEliminarProducto: (id: string) => void;
   onCancelarEdicion: () => void;
+  configuracion: Configuracion;
 }
 
 export const GestionProductos: React.FC<GestionProductosProps> = ({
@@ -27,193 +28,241 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
   onEditarProducto,
   onGuardarEdicion,
   onEliminarProducto,
-  onCancelarEdicion
+  onCancelarEdicion,
+  configuracion
 }) => {
+  const formatearNumero = (numero: number | string) => {
+    return new Intl.NumberFormat('es-CO').format(Number(numero));
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">
-          {editandoId ? 'Editar Producto' : 'Nuevo Producto'}
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid lg:grid-cols-2 gap-8">
+      {/* Formulario */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-blue-50 rounded-xl">
+            <Calculator className="w-6 h-6 text-blue-600" />
+          </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Nombre</label>
+            <h2 className="text-xl font-bold text-slate-800">
+              {editandoId ? 'Editar Producto' : 'Nuevo Producto'}
+            </h2>
+            <p className="text-slate-600">Calcula precios óptimos automáticamente</p>
+          </div>
+        </div>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Nombre del Producto
+            </label>
             <input
               type="text"
               value={productoActual.nombre}
               onChange={(e) => onCambioInput('nombre', e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="Nombre del producto"
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Ej: Pañales Huggies Talla M"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Categoría</label>
-            <select
-              value={productoActual.categoria}
-              onChange={(e) => onCambioInput('categoria', e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            >
-              {CATEGORIAS.map(cat => (
-                <option key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </option>
-              ))}
-            </select>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Categoría
+              </label>
+              <select
+                value={productoActual.categoria}
+                onChange={(e) => onCambioInput('categoria', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              >
+                {CATEGORIAS.map(cat => (
+                  <option key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Stock Inicial
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.stock)}
+                onChange={(e) => onCambioInput('stock', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Costo de Compra</label>
-            <input
-              type="text"
-              value={formatearInput(productoActual.costoCompra)}
-              onChange={(e) => onCambioInput('costoCompra', e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="0"
-            />
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Costo de Compra ($)
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.costoCompra)}
+                onChange={(e) => onCambioInput('costoCompra', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Gastos Fijos Asignados ($)
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.gastosFijos)}
+                onChange={(e) => onCambioInput('gastosFijos', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Gastos Fijos</label>
-            <input
-              type="text"
-              value={formatearInput(productoActual.gastosFijos)}
-              onChange={(e) => onCambioInput('gastosFijos', e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="0"
-            />
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Ventas Estimadas (30 días)
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.ventasUltimos30Dias)}
+                onChange={(e) => onCambioInput('ventasUltimos30Dias', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Precio Competencia ($)
+              </label>
+              <input
+                type="text"
+                value={formatearInput(productoActual.precioCompetencia)}
+                onChange={(e) => onCambioInput('precioCompetencia', e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="0"
+              />
+            </div>
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Margen Deseado (%)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Margen de Ganancia Deseado (%)
+            </label>
             <input
               type="number"
+              step="1"
               value={productoActual.margenDeseado}
               onChange={(e) => onCambioInput('margenDeseado', e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="30"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Stock</label>
-            <input
-              type="number"
-              value={productoActual.stock}
-              onChange={(e) => onCambioInput('stock', e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="0"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 mt-6">
+          
           <button
-            onClick={onCalcularPrecios}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={editandoId ? onGuardarEdicion : onAgregarProducto}
+            disabled={!productoActual.nombre || !productoActual.costoCompra || productoActual.costoCompra === ''}
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
           >
-            <Calculator className="w-4 h-4" />
-            Calcular Precios
+            <Save size={20} />
+            <span>{editandoId ? 'Actualizar Producto' : 'Agregar Producto'}</span>
           </button>
-
-          {productoActual.precioVenta && (
-            <div className="flex items-center gap-4 text-sm">
-              <span className="text-slate-600">Precio de Venta:</span>
-              <span className="font-semibold text-emerald-600">
-                {formatearMoneda(productoActual.precioVenta)}
-              </span>
-              <span className="text-slate-600">Utilidad:</span>
-              <span className="font-semibold text-emerald-600">
-                {formatearMoneda(productoActual.utilidad)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-4 mt-4">
-          {editandoId ? (
-            <>
-              <button
-                onClick={onGuardarEdicion}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                <Save className="w-4 h-4" />
-                Guardar Cambios
-              </button>
-              <button
-                onClick={onCancelarEdicion}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Cancelar
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={onAgregarProducto}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Agregar Producto
-            </button>
-          )}
         </div>
       </div>
-
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">Lista de Productos</h3>
+      
+      {/* Resultados */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-emerald-50 rounded-xl">
+            <TrendingUp className="w-6 h-6 text-emerald-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Resultados del Cálculo</h2>
+            <p className="text-slate-600">Análisis de precios y rentabilidad</p>
+          </div>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="text-left p-4 font-medium text-slate-700">Producto</th>
-                <th className="text-left p-4 font-medium text-slate-700">Categoría</th>
-                <th className="text-left p-4 font-medium text-slate-700">Costo</th>
-                <th className="text-left p-4 font-medium text-slate-700">Precio Venta</th>
-                <th className="text-left p-4 font-medium text-slate-700">Utilidad</th>
-                <th className="text-left p-4 font-medium text-slate-700">Stock</th>
-                <th className="text-left p-4 font-medium text-slate-700">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.map((producto) => (
-                <tr key={producto.id} className="border-b border-slate-200 hover:bg-slate-50">
-                  <td className="p-4 font-medium text-slate-900">{producto.nombre}</td>
-                  <td className="p-4 text-slate-600 capitalize">{producto.categoria}</td>
-                  <td className="p-4 text-slate-900">{formatearMoneda(producto.costoCompra)}</td>
-                  <td className="p-4 text-slate-900">{formatearMoneda(producto.precioVenta)}</td>
-                  <td className="p-4 text-emerald-600 font-medium">{formatearMoneda(producto.utilidad)}</td>
-                  <td className="p-4 text-slate-900">{producto.stock}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => onEditarProducto(producto.id)}
-                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onEliminarProducto(producto.id)}
-                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          
-          {productos.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-slate-500">No hay productos registrados</p>
+        <div className="space-y-4">
+          <div className="bg-slate-50 rounded-xl p-4">
+            <div className="text-sm font-medium text-slate-600">Costo Base del Producto</div>
+            <div className="text-xl font-bold text-slate-800">
+              {productoActual.costoCompra && parseFloat(productoActual.costoCompra) > 0
+                ? `$${formatearNumero(parseFloat(productoActual.costoCompra).toFixed(0))}`
+                : '-'}
             </div>
-          )}
+          </div>
+          
+          <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+            <div className="text-sm font-medium text-orange-700">Costo Fijo Distribuido</div>
+            <div className="text-xl font-bold text-orange-800">
+              {(() => {
+                const totalCostosFijos = Object.values(configuracion.costosFijos).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
+                const totalHerramientas = Object.values(configuracion.herramientas).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
+                const total = totalCostosFijos + totalHerramientas;
+                return total > 0 ? `$${formatearNumero(((totalCostosFijos + totalHerramientas) / (configuracion.ventasEstimadas || 1)).toFixed(0))}` : '-';
+              })()}
+            </div>
+            <div className="text-xs text-orange-600 mt-1">Arriendo, servicios, herramientas</div>
+          </div>
+          
+          <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+            <div className="text-sm font-medium text-purple-700">
+              Gastos Operativos ({Object.values(configuracion.porcentajes).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0).toFixed(1)}%)
+            </div>
+            <div className="text-xl font-bold text-purple-800">
+              {(() => {
+                const costo = parseFloat(productoActual.costoCompra) || 0;
+                const gastos = parseFloat(productoActual.gastosFijos) || 0;
+                const totalCostosFijos = Object.values(configuracion.costosFijos).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
+                const totalHerramientas = Object.values(configuracion.herramientas).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
+                const costoFijoPorProducto = (totalCostosFijos + totalHerramientas) / (configuracion.ventasEstimadas || 1);
+                const totalPorcentajes = Object.values(configuracion.porcentajes).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
+                const costoBase = costo + gastos + costoFijoPorProducto;
+                
+                if (costoBase === 0 || totalPorcentajes === 0) return '-';
+                
+                const precioConPorcentajes = costoBase / (1 - (totalPorcentajes / 100));
+                const gastosOperativos = precioConPorcentajes - costoBase;
+                return `$${formatearNumero(gastosOperativos.toFixed(0))}`;
+              })()}
+            </div>
+            <div className="text-xs text-purple-600 mt-1">Contabilidad, mercadeo, ventas, etc.</div>
+          </div>
+          
+          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="text-sm font-medium text-blue-700">Precio de Venta Final</div>
+            <div className="text-3xl font-bold text-blue-800">
+              {productoActual.precioVenta && parseFloat(productoActual.precioVenta) > 0 
+                ? `$${formatearNumero(parseFloat(productoActual.precioVenta).toFixed(0))}` 
+                : '-'}
+            </div>
+          </div>
+          
+          <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+            <div className="text-sm font-medium text-emerald-700">Utilidad Neta por Unidad</div>
+            <div className="text-3xl font-bold text-emerald-800">
+              {productoActual.utilidad && parseFloat(productoActual.utilidad) > 0 
+                ? `$${formatearNumero(parseFloat(productoActual.utilidad).toFixed(0))}` 
+                : '-'}
+            </div>
+          </div>
+          
+          <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+            <div className="text-sm font-medium text-yellow-700">Margen de Ganancia</div>
+            <div className="text-2xl font-bold text-yellow-800">
+              {productoActual.margenDeseado && parseFloat(productoActual.margenDeseado) > 0 
+                ? `${productoActual.margenDeseado}%` 
+                : '-'}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,242 @@
+import React from 'react';
+import { Edit2, Trash2, Package, TrendingUp, TrendingDown } from 'lucide-react';
+import { Producto, Venta } from '../../types';
+import { formatearNumero, formatearMoneda } from '../../utils/formatters';
+import { calcularVentasReales30Dias } from '../../utils/calculations';
+
+interface InventarioProps {
+  productos: Producto[];
+  onEditarProducto: (producto: Producto) => void;
+  onEliminarProducto: (id: string) => void;
+  ventas: Venta[];
+}
+
+export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProducto, onEliminarProducto, ventas }) => {
+  const calcularPuntoEquilibrio = (producto: Producto) => {
+    const costoUnitario = (parseFloat(producto.costoCompra) || 0) + (parseFloat(producto.gastosFijos) || 0);
+    const precioVenta = parseFloat(producto.precioVenta) || 0;
+    const contribucionUnitaria = precioVenta - costoUnitario;
+    
+    if (contribucionUnitaria <= 0) return 'No rentable';
+    
+    // Simplificado para el ejemplo
+    const costosFijos = 2560000; // Ejemplo
+    const unidadesEquilibrio = Math.ceil(costosFijos / contribucionUnitaria);
+    return unidadesEquilibrio;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <Package className="text-purple-500" />
+          Gestión de Inventario
+        </h2>
+        <div className="text-sm text-gray-600">
+          Total: {productos.length} productos
+        </div>
+      </div>
+
+      {productos.length === 0 ? (
+        <div className="text-center py-12">
+          <Package className="mx-auto text-gray-400 mb-4" size={64} />
+          <p className="text-xl text-gray-500 mb-2">No hay productos en el inventario</p>
+          <p className="text-gray-400">Agrega productos desde la calculadora para comenzar</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Producto
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Categoría
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Costo
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio Venta
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Utilidad
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Margen %
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ventas 30d
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Punto Equilibrio
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estado
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {productos.map((producto) => {
+                  const stock = parseFloat(producto.stock) || 0;
+                  const costo = parseFloat(producto.costoCompra) || 0;
+                  const precio = parseFloat(producto.precioVenta) || 0;
+                  const utilidad = parseFloat(producto.utilidad) || 0;
+                  const margen = precio > 0 ? ((precio - costo) / precio) * 100 : 0;
+                  const ventasReales = calcularVentasReales30Dias(producto.id, ventas);
+                  const puntoEquilibrio = calcularPuntoEquilibrio(producto);
+                  
+                  const getEstadoStock = () => {
+                    if (stock === 0) return { texto: 'Sin stock', color: 'red' };
+                    if (stock < 5) return { texto: 'Stock bajo', color: 'yellow' };
+                    if (stock < 10) return { texto: 'Stock medio', color: 'blue' };
+                    return { texto: 'Stock bueno', color: 'green' };
+                  };
+                  
+                  const estadoStock = getEstadoStock();
+                  
+                  return (
+                    <tr key={producto.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{producto.nombre}</div>
+                          <div className="text-sm text-gray-500">#{producto.id.slice(0, 8)}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                          {producto.categoria}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{formatearNumero(stock)}</div>
+                        <div className={`text-xs text-${estadoStock.color}-600`}>{estadoStock.texto}</div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${formatearNumero(costo)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${formatearNumero(precio)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-green-600">
+                          ${formatearNumero(utilidad)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className={`text-sm font-medium ${margen >= 30 ? 'text-green-600' : margen >= 20 ? 'text-yellow-600' : 'text-red-600'}`}>
+                          {margen.toFixed(1)}%
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className="text-sm text-gray-900">{ventasReales}</span>
+                          {ventasReales > (parseFloat(producto.ventasUltimos30Dias) || 0) ? (
+                            <TrendingUp className="ml-1 w-4 h-4 text-green-500" />
+                          ) : ventasReales < (parseFloat(producto.ventasUltimos30Dias) || 0) ? (
+                            <TrendingDown className="ml-1 w-4 h-4 text-red-500" />
+                          ) : null}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Estimado: {producto.ventasUltimos30Dias || 0}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {typeof puntoEquilibrio === 'number' ? formatearNumero(puntoEquilibrio) : puntoEquilibrio}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex flex-col space-y-1">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            margen >= 30 ? 'bg-green-100 text-green-800' :
+                            margen >= 20 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {margen >= 30 ? 'Excelente' : margen >= 20 ? 'Bueno' : 'Revisar'}
+                          </span>
+                          {producto.rotacion && (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              producto.rotacion === 'alta' ? 'bg-blue-100 text-blue-800' :
+                              producto.rotacion === 'media' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              Rot. {producto.rotacion}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => onEditarProducto(producto)}
+                            className="text-blue-600 hover:text-blue-900 transition-colors"
+                            title="Editar producto"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm(`¿Estás seguro de eliminar ${producto.nombre}?`)) {
+                                onEliminarProducto(producto.id);
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-900 transition-colors"
+                            title="Eliminar producto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Resumen del Inventario */}
+      <div className="grid md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Valor Total Inventario</h4>
+          <p className="text-2xl font-bold text-gray-800">
+            ${formatearNumero(productos.reduce((sum, p) => sum + ((parseFloat(p.stock) || 0) * (parseFloat(p.costoCompra) || 0)), 0).toFixed(0))}
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Productos con Stock Bajo</h4>
+          <p className="text-2xl font-bold text-yellow-600">
+            {productos.filter(p => (parseFloat(p.stock) || 0) < 5).length}
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Sin Stock</h4>
+          <p className="text-2xl font-bold text-red-600">
+            {productos.filter(p => (parseFloat(p.stock) || 0) === 0).length}
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Margen Promedio</h4>
+          <p className="text-2xl font-bold text-green-600">
+            {productos.length > 0 ? (productos.reduce((sum, p) => {
+              const precio = parseFloat(p.precioVenta) || 0;
+              const costo = parseFloat(p.costoCompra) || 0;
+              return sum + (precio > 0 ? ((precio - costo) / precio) * 100 : 0);
+            }, 0) / productos.length).toFixed(1) : 0}%
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};

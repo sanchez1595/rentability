@@ -43,7 +43,7 @@ export const calcularVentasReales30Dias = (
       venta.productoId === productoId && 
       new Date(venta.fecha) >= hace30Dias
     )
-    .reduce((total, venta) => total + (parseFloat(venta.cantidad) || 0), 0);
+    .reduce((total, venta) => total + venta.cantidad, 0);
 };
 
 export const calcularIngresosReales30Dias = (
@@ -58,9 +58,7 @@ export const calcularIngresosReales30Dias = (
       const dentroFecha = new Date(venta.fecha) >= hace30Dias;
       return productoId ? (venta.productoId === productoId && dentroFecha) : dentroFecha;
     })
-    .reduce((total, venta) => 
-      total + ((parseFloat(venta.cantidad) || 0) * (parseFloat(venta.precioVenta) || 0)), 0
-    );
+    .reduce((total, venta) => total + venta.ingresoTotal, 0);
 };
 
 export const obtenerTendenciaVentas = (ventas: Venta[]) => {
@@ -72,24 +70,24 @@ export const obtenerTendenciaVentas = (ventas: Venta[]) => {
 
   const ventasUltimos7 = ventas
     .filter(venta => new Date(venta.fecha) >= hace7Dias)
-    .reduce((total, venta) => total + (parseFloat(venta.cantidad) || 0), 0);
+    .reduce((total, venta) => total + venta.ingresoTotal, 0);
 
   const ventas7DiasAnteriores = ventas
     .filter(venta => {
       const fecha = new Date(venta.fecha);
       return fecha >= hace14Dias && fecha < hace7Dias;
     })
-    .reduce((total, venta) => total + (parseFloat(venta.cantidad) || 0), 0);
+    .reduce((total, venta) => total + venta.ingresoTotal, 0);
 
   const cambio = ventas7DiasAnteriores > 0 
-    ? ((ventasUltimos7 - ventas7DiasAnteriores) / ventas7DiasAnteriores) * 100
-    : ventasUltimos7 > 0 ? 100 : 0;
+    ? ((ventasUltimos7 - ventas7DiasAnteriores) / ventas7DiasAnteriores) * 100 
+    : 0;
 
   return {
     ventasUltimos7,
     ventas7DiasAnteriores,
-    cambio,
-    tendencia: cambio > 0 ? 'up' : cambio < 0 ? 'down' : 'stable'
+    cambioPortentual: cambio,
+    tendencia: cambio > 5 ? 'subiendo' : cambio < -5 ? 'bajando' : 'estable'
   };
 };
 
