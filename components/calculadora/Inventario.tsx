@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2, Package } from 'lucide-react';
+import { Edit2, Trash2, Package, Package2 } from 'lucide-react';
 import { Producto, Venta } from '../../types';
 import { formatearNumero } from '../../utils/formatters';
 
@@ -21,6 +21,53 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
         </h2>
         <div className="text-sm text-gray-600">
           Total: {productos.length} productos
+        </div>
+      </div>
+
+      {/* Resumen del Inventario - Movido aquí arriba */}
+      <div className="grid md:grid-cols-5 gap-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Valor Total Inventario</h4>
+          <p className="text-2xl font-bold text-gray-800">
+            ${formatearNumero(productos.reduce((sum, p) => sum + ((parseFloat(p.stock) || 0) * (parseFloat(p.costoCompra) || 0)), 0).toFixed(0))}
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Productos con Stock Bajo</h4>
+          <p className="text-2xl font-bold text-yellow-600">
+            {productos.filter(p => (parseFloat(p.stock) || 0) < 5).length}
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Sin Stock</h4>
+          <p className="text-2xl font-bold text-red-600">
+            {productos.filter(p => (parseFloat(p.stock) || 0) === 0).length}
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Productos en Paquete</h4>
+          <p className="text-2xl font-bold text-amber-600">
+            {productos.filter(p => p.esPaquete).length}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            de {productos.length} total
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">Margen Promedio</h4>
+          <p className="text-2xl font-bold text-green-600">
+            {productos.length > 0 ? (productos.reduce((sum, p) => {
+              const precio = parseFloat(p.precioVenta) || 0;
+              const costoReal = p.esPaquete && p.costoUnitario 
+                ? parseFloat(p.costoUnitario) 
+                : parseFloat(p.costoCompra) || 0;
+              return sum + (precio > 0 ? ((precio - costoReal) / precio) * 100 : 0);
+            }, 0) / productos.length).toFixed(1) : 0}%
+          </p>
         </div>
       </div>
 
@@ -88,9 +135,25 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                   return (
                     <tr key={producto.id} className="hover:bg-gray-50">
                       <td className="px-3 py-3 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{producto.nombre}</div>
-                          <div className="text-xs text-gray-500">#{producto.id.slice(0, 8)}</div>
+                        <div className="flex items-start space-x-2">
+                          <div className="flex-shrink-0 mt-0.5">
+                            {producto.esPaquete ? (
+                              <Package2 className="w-4 h-4 text-amber-600" />
+                            ) : (
+                              <Package className="w-4 h-4 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium text-gray-900">{producto.nombre}</span>
+                              {producto.esPaquete && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                  Paquete x{producto.unidadesPorPaquete || 1}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-500">#{producto.id.slice(0, 8)}</div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap">
@@ -180,42 +243,6 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
         </div>
       )}
 
-      {/* Resumen del Inventario */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Valor Total Inventario</h4>
-          <p className="text-2xl font-bold text-gray-800">
-            ${formatearNumero(productos.reduce((sum, p) => sum + ((parseFloat(p.stock) || 0) * (parseFloat(p.costoCompra) || 0)), 0).toFixed(0))}
-          </p>
-        </div>
-        
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Productos con Stock Bajo</h4>
-          <p className="text-2xl font-bold text-yellow-600">
-            {productos.filter(p => (parseFloat(p.stock) || 0) < 5).length}
-          </p>
-        </div>
-        
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Sin Stock</h4>
-          <p className="text-2xl font-bold text-red-600">
-            {productos.filter(p => (parseFloat(p.stock) || 0) === 0).length}
-          </p>
-        </div>
-        
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Margen Promedio</h4>
-          <p className="text-2xl font-bold text-green-600">
-            {productos.length > 0 ? (productos.reduce((sum, p) => {
-              const precio = parseFloat(p.precioVenta) || 0;
-              const costoReal = p.esPaquete && p.costoUnitario 
-                ? parseFloat(p.costoUnitario) 
-                : parseFloat(p.costoCompra) || 0;
-              return sum + (precio > 0 ? ((precio - costoReal) / precio) * 100 : 0);
-            }, 0) / productos.length).toFixed(1) : 0}%
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
