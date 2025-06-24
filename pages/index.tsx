@@ -1,16 +1,19 @@
 import Head from 'next/head'
+import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 import { BabyStoreCalculatorWithSupabase } from '../components/calculadora/BabyStoreCalculatorWithSupabase'
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>Baby Store Calculator - Calculadora de Rentabilidad</title>
-        <meta name="description" content="Calculadora de rentabilidad para tiendas de productos para bebés" />
+        <title>BabyStore Pro - Sistema de Gestión Empresarial</title>
+        <meta name="description" content="Sistema de gestión completo para tiendas de productos para bebés" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <BabyStoreCalculatorWithSupabase />
+      <ProtectedRoute>
+        <BabyStoreCalculatorWithSupabase />
+      </ProtectedRoute>
     </>
   )
 }
