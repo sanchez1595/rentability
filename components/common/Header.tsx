@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             <Menu className="w-5 h-5" />
           </button>
           <h1 className="text-xl font-semibold text-slate-900">
-            BabyStore Pro
+            Rentability
           </h1>
         </div>
         

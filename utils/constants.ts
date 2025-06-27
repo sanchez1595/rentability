@@ -68,7 +68,8 @@ export const PRODUCTO_INICIAL = {
   rotacion: 'alta' as const,
   esPaquete: false,
   unidadesPorPaquete: '1',
-  costoUnitario: ''
+  costoUnitario: '',
+  cantidadPaquetes: '1'
 };
 
 export const VENTA_INICIAL = {
@@ -77,5 +78,6 @@ export const VENTA_INICIAL = {
   precioVenta: '',
   fecha: new Date().toISOString().split('T')[0],
   cliente: '',
-  metodoPago: 'efectivo' as const
+  metodoPago: 'efectivo' as const,
+  tipoVenta: 'unidad' as const
 };

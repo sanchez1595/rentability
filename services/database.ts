@@ -18,7 +18,8 @@ const convertProductoFromDB = (productoDB: ProductoDB): Producto => ({
   rotacion: productoDB.rotacion,
   esPaquete: productoDB.es_paquete || false,
   unidadesPorPaquete: (productoDB.unidades_por_paquete || 1).toString(),
-  costoUnitario: (productoDB.costo_unitario || 0).toString()
+  costoUnitario: (productoDB.costo_unitario || 0).toString(),
+  cantidadPaquetes: (productoDB.cantidad_paquetes || 1).toString()
 });
 
 const convertProductoToDB = (producto: Producto): Omit<ProductoDB, 'id' | 'created_at' | 'updated_at'> => ({
@@ -36,7 +37,8 @@ const convertProductoToDB = (producto: Producto): Omit<ProductoDB, 'id' | 'creat
   rotacion: producto.rotacion,
   es_paquete: producto.esPaquete || false,
   unidades_por_paquete: parseInt(producto.unidadesPorPaquete) || 1,
-  costo_unitario: parseFloat(producto.costoUnitario) || 0
+  costo_unitario: parseFloat(producto.costoUnitario) || 0,
+  cantidad_paquetes: parseInt(producto.cantidadPaquetes) || 1
 });
 
 const convertVentaFromDB = (ventaDB: VentaDB): Venta => ({
@@ -50,7 +52,8 @@ const convertVentaFromDB = (ventaDB: VentaDB): Venta => ({
   cliente: ventaDB.cliente,
   metodoPago: ventaDB.metodo_pago,
   utilidadTotal: ventaDB.utilidad_total,
-  ingresoTotal: ventaDB.ingreso_total
+  ingresoTotal: ventaDB.ingreso_total,
+  tipoVenta: (ventaDB.tipo_venta as 'unidad' | 'paquete') || 'unidad'
 });
 
 const convertVentaToDB = (venta: Omit<Venta, 'id'>): Omit<VentaDB, 'id' | 'created_at'> => ({
@@ -63,7 +66,8 @@ const convertVentaToDB = (venta: Omit<Venta, 'id'>): Omit<VentaDB, 'id' | 'creat
   cliente: venta.cliente,
   metodo_pago: venta.metodoPago,
   utilidad_total: venta.utilidadTotal,
-  ingreso_total: venta.ingresoTotal
+  ingreso_total: venta.ingresoTotal,
+  tipo_venta: venta.tipoVenta
 });
 
 // Servicio de Productos

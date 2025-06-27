@@ -32,7 +32,8 @@ export const useVentas = () => {
       cliente: ventaActual.cliente || 'Cliente general',
       metodoPago: ventaActual.metodoPago,
       utilidadTotal: ((parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) - (parseFloat(producto.costoCompra) || 0)) * cantidad,
-      ingresoTotal: (parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) * cantidad
+      ingresoTotal: (parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) * cantidad,
+      tipoVenta: ventaActual.tipoVenta || 'unidad'
     };
     
     // Agregar venta al historial
@@ -45,7 +46,8 @@ export const useVentas = () => {
       precioVenta: '',
       fecha: new Date().toISOString().split('T')[0],
       cliente: '',
-      metodoPago: 'efectivo'
+      metodoPago: 'efectivo',
+      tipoVenta: 'unidad'
     });
     
     // Mostrar confirmación

@@ -42,14 +42,7 @@ export const BabyStoreCalculatorWithSupabase = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [productoActual, setProductoActual] = useState<ProductoActual>(PRODUCTO_INICIAL);
   const [editandoId, setEditandoId] = useState<string | null>(null);
-  const [ventaActual, setVentaActual] = useState<VentaActual>({
-    productoId: '',
-    cantidad: '',
-    precioVenta: '',
-    fecha: new Date().toISOString().split('T')[0],
-    cliente: '',
-    metodoPago: 'efectivo'
-  });
+  const [ventaActual, setVentaActual] = useState<VentaActual>(VENTA_INICIAL);
 
   // Calcular precios cuando cambian los valores
   useEffect(() => {
@@ -196,17 +189,11 @@ export const BabyStoreCalculatorWithSupabase = () => {
         cliente: ventaActual.cliente || 'Cliente general',
         metodoPago: ventaActual.metodoPago,
         utilidadTotal: ((parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) - (parseFloat(producto.costoCompra) || 0)) * cantidad,
-        ingresoTotal: (parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) * cantidad
+        ingresoTotal: (parseFloat(ventaActual.precioVenta) || parseFloat(producto.precioVenta) || 0) * cantidad,
+        tipoVenta: ventaActual.tipoVenta || 'unidad'
       });
       
-      setVentaActual({
-        productoId: '',
-        cantidad: '',
-        precioVenta: '',
-        fecha: new Date().toISOString().split('T')[0],
-        cliente: '',
-        metodoPago: 'efectivo'
-      });
+      setVentaActual(VENTA_INICIAL);
     } catch (error) {
       console.error('Error registrando venta:', error);
       alert('Error al registrar la venta');

@@ -107,7 +107,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Crear Cuenta</h2>
-          <p className="text-gray-600 mt-2">Únete a BabyStore Pro</p>
+          <p className="text-gray-600 mt-2">Únete a Rentability</p>
         </div>
 
         {error && (

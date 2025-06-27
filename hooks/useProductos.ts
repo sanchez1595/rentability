@@ -9,19 +9,42 @@ export const useProductos = (configuracion: any) => {
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
   const manejarCambioInput = useCallback((campo: keyof ProductoActual, valor: string) => {
-    setProductoActual(prev => ({
-      ...prev,
-      [campo]: valor
-    }));
+    setProductoActual(prev => {
+      const newProducto = {
+        ...prev,
+        [campo]: valor
+      };
+      
+      // Si es un producto con paquete, calcular automáticamente el stock y costo unitario
+      if (newProducto.esPaquete) {
+        const cantidadPaquetes = parseFloat(newProducto.cantidadPaquetes) || 0;
+        const unidadesPorPaquete = parseFloat(newProducto.unidadesPorPaquete) || 0;
+        const costoTotal = parseFloat(newProducto.costoCompra) || 0;
+        
+        // Calcular stock automáticamente
+        if (cantidadPaquetes > 0 && unidadesPorPaquete > 0) {
+          newProducto.stock = (cantidadPaquetes * unidadesPorPaquete).toString();
+        }
+        
+        // Calcular costo unitario automáticamente
+        if (costoTotal > 0 && cantidadPaquetes > 0 && unidadesPorPaquete > 0) {
+          const totalUnidades = cantidadPaquetes * unidadesPorPaquete;
+          newProducto.costoUnitario = (costoTotal / totalUnidades).toFixed(2);
+        }
+      }
+      
+      return newProducto;
+    });
   }, []);
 
   const calcularPreciosProducto = useCallback(() => {
-    const { precioVenta, utilidad } = calcularPrecios(productoActual, configuracion);
+    const { precioVenta, utilidad, costoUnitario } = calcularPrecios(productoActual, configuracion);
     
     setProductoActual(prev => ({
       ...prev,
       precioVenta: precioVenta.toString(),
-      utilidad: utilidad.toString()
+      utilidad: utilidad.toString(),
+      costoUnitario: costoUnitario.toString()
     }));
   }, [productoActual, configuracion]);
 

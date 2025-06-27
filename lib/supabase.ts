@@ -23,6 +23,7 @@ export interface ProductoDB {
   es_paquete?: boolean;
   unidades_por_paquete?: number;
   costo_unitario?: number;
+  cantidad_paquetes?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -39,6 +40,7 @@ export interface VentaDB {
   metodo_pago: string;
   utilidad_total: number;
   ingreso_total: number;
+  tipo_venta?: string;
   created_at?: string;
 }
 

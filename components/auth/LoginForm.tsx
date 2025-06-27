@@ -58,7 +58,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode, onForgotPass
             </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Iniciar Sesión</h2>
-          <p className="text-gray-600 mt-2">Accede a tu cuenta de BabyStore Pro</p>
+          <p className="text-gray-600 mt-2">Accede a tu cuenta de Rentability</p>
         </div>
 
         {error && (

@@ -4,11 +4,12 @@ export const calcularPrecios = (
   productoActual: ProductoActual,
   configuracion: Configuracion
 ) => {
-  const costo = parseFloat(productoActual.costoCompra) || 0;
+  const costoTotal = parseFloat(productoActual.costoCompra) || 0;
   const gastos = parseFloat(productoActual.gastosFijos) || 0;
   const margen = parseFloat(productoActual.margenDeseado) || 0;
   const esPaquete = productoActual.esPaquete;
   const unidadesPorPaquete = parseFloat(productoActual.unidadesPorPaquete) || 1;
+  const cantidadPaquetes = parseFloat(productoActual.cantidadPaquetes) || 1;
 
   const totalCostosFijos = Object.values(configuracion.costosFijos)
     .reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
@@ -19,15 +20,16 @@ export const calcularPrecios = (
   const totalPorcentajes = Object.values(configuracion.porcentajes)
     .reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0);
 
-  // Si es paquete, dividir todos los costos entre las unidades
-  let costoUnitario = costo;
+  // Si es paquete, dividir todos los costos entre las unidades totales
+  let costoUnitario = costoTotal;
   let gastosUnitarios = gastos;
   let costoFijoUnitario = costoFijoPorProducto;
 
-  if (esPaquete && unidadesPorPaquete > 1) {
-    costoUnitario = costo / unidadesPorPaquete;
-    gastosUnitarios = gastos / unidadesPorPaquete;
-    costoFijoUnitario = costoFijoPorProducto / unidadesPorPaquete;
+  if (esPaquete && unidadesPorPaquete > 0 && cantidadPaquetes > 0) {
+    const unidadesTotales = unidadesPorPaquete * cantidadPaquetes;
+    costoUnitario = costoTotal / unidadesTotales;
+    gastosUnitarios = gastos / unidadesTotales;
+    costoFijoUnitario = costoFijoPorProducto;
   }
 
   const costoBase = costoUnitario + gastosUnitarios + costoFijoUnitario;

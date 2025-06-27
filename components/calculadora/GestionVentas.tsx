@@ -45,7 +45,30 @@ export const GestionVentas: React.FC<GestionVentasProps> = ({
     if (productoId) {
       const producto = productos.find(p => p.id === productoId);
       if (producto) {
+        // Establecer tipo de venta por defecto
+        if (producto.esPaquete) {
+          onActualizarVenta('tipoVenta', 'unidad');
+        } else {
+          onActualizarVenta('tipoVenta', 'unidad');
+        }
         onActualizarVenta('precioVenta', producto.precioVenta);
+      }
+    }
+  };
+
+  const handleTipoVentaChange = (tipoVenta: string) => {
+    onActualizarVenta('tipoVenta', tipoVenta);
+    
+    // Actualizar precio según el tipo de venta
+    if (ventaActual.productoId) {
+      const producto = productos.find(p => p.id === ventaActual.productoId);
+      if (producto) {
+        if (tipoVenta === 'paquete' && producto.esPaquete && producto.unidadesPorPaquete) {
+          const precioPaquete = parseFloat(producto.precioVenta) * parseFloat(producto.unidadesPorPaquete);
+          onActualizarVenta('precioVenta', precioPaquete.toString());
+        } else {
+          onActualizarVenta('precioVenta', producto.precioVenta);
+        }
       }
     }
   };
@@ -98,38 +121,127 @@ export const GestionVentas: React.FC<GestionVentasProps> = ({
                 const productoSeleccionado = productos.find(p => p.id == ventaActual.productoId);
                 return (
                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">Información del Producto</h4>
+                    <h4 className="font-semibold text-blue-800 mb-3">Información del Producto</h4>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-blue-600 font-medium">Stock:</span>
                         <div className="font-bold">{formatearNumero(productoSeleccionado?.stock || 0)} unidades</div>
                       </div>
                       <div>
-                        <span className="text-blue-600 font-medium">Precio:</span>
+                        <span className="text-blue-600 font-medium">Precio unitario:</span>
                         <div className="font-bold">${formatearNumero(parseFloat(productoSeleccionado?.precioVenta || '0').toFixed(0))}</div>
                       </div>
                       <div>
-                        <span className="text-blue-600 font-medium">Costo:</span>
-                        <div className="font-bold">${formatearNumero(parseFloat(productoSeleccionado?.costoCompra || '0').toFixed(0))}</div>
+                        <span className="text-blue-600 font-medium">Costo unitario:</span>
+                        <div className="font-bold">${formatearNumero(parseFloat(productoSeleccionado?.costoUnitario || productoSeleccionado?.costoCompra || '0').toFixed(0))}</div>
                       </div>
                     </div>
+                    
+                    {productoSeleccionado?.esPaquete && (
+                      <div className="mt-3 pt-3 border-t border-blue-300">
+                        <div className="text-amber-700 font-medium text-sm mb-2">💦 Producto en paquete</div>
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <span className="text-amber-600">Unidades por paquete:</span>
+                            <div className="font-bold text-amber-800">{productoSeleccionado.unidadesPorPaquete}</div>
+                          </div>
+                          <div>
+                            <span className="text-amber-600">Precio paquete completo:</span>
+                            <div className="font-bold text-amber-800">
+                              ${formatearNumero(((parseFloat(productoSeleccionado.precioVenta) || 0) * (parseFloat(productoSeleccionado.unidadesPorPaquete) || 1)).toFixed(0))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
+              })()}
+              
+              {/* Tipo de Venta - Solo para productos en paquete */}
+              {ventaActual.productoId && (() => {
+                const productoSeleccionado = productos.find(p => p.id == ventaActual.productoId);
+                if (productoSeleccionado?.esPaquete) {
+                  return (
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Tipo de Venta
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <label className="flex items-center p-3 border border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                          <input
+                            type="radio"
+                            name="tipoVenta"
+                            value="unidad"
+                            checked={ventaActual.tipoVenta === 'unidad'}
+                            onChange={(e) => handleTipoVentaChange(e.target.value)}
+                            className="mr-3 text-emerald-600"
+                          />
+                          <div>
+                            <div className="text-sm font-medium">Por unidad</div>
+                            <div className="text-xs text-slate-500">Vender unidades individuales</div>
+                          </div>
+                        </label>
+                        <label className="flex items-center p-3 border border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                          <input
+                            type="radio"
+                            name="tipoVenta"
+                            value="paquete"
+                            checked={ventaActual.tipoVenta === 'paquete'}
+                            onChange={(e) => handleTipoVentaChange(e.target.value)}
+                            className="mr-3 text-amber-600"
+                          />
+                          <div>
+                            <div className="text-sm font-medium">Por paquete</div>
+                            <div className="text-xs text-slate-500">Vender paquete completo</div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
               })()}
               
               {/* Cantidad y Precio */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Cantidad Vendida
+                    {(() => {
+                      const productoSeleccionado = productos.find(p => p.id == ventaActual.productoId);
+                      if (productoSeleccionado?.esPaquete && ventaActual.tipoVenta === 'paquete') {
+                        return 'Cantidad de Paquetes';
+                      }
+                      return 'Cantidad de Unidades';
+                    })()}
                   </label>
                   <input
                     type="text"
                     value={formatearInput(ventaActual.cantidad)}
                     onChange={(e) => onActualizarVenta('cantidad', parsearInput(e.target.value).toString())}
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                    placeholder="1"
+                    placeholder={(() => {
+                      const productoSeleccionado = productos.find(p => p.id == ventaActual.productoId);
+                      if (productoSeleccionado?.esPaquete && ventaActual.tipoVenta === 'paquete') {
+                        return 'Ej: 2 paquetes';
+                      }
+                      return 'Ej: 1 unidad';
+                    })()}
                   />
+                  {(() => {
+                    const productoSeleccionado = productos.find(p => p.id == ventaActual.productoId);
+                    if (productoSeleccionado?.esPaquete && ventaActual.tipoVenta === 'paquete' && ventaActual.cantidad) {
+                      const cantidadPaquetes = parseFloat(ventaActual.cantidad) || 0;
+                      const unidadesPorPaquete = parseFloat(productoSeleccionado.unidadesPorPaquete) || 0;
+                      const totalUnidades = cantidadPaquetes * unidadesPorPaquete;
+                      return (
+                        <p className="text-xs text-amber-600 mt-1">
+                          = {formatearNumero(totalUnidades)} unidades individuales
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 
                 <div>
@@ -193,25 +305,53 @@ export const GestionVentas: React.FC<GestionVentasProps> = ({
               </div>
 
               {/* Resumen de Venta */}
-              {ventaActual.productoId && ventaActual.cantidad && ventaActual.precioVenta && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6">
-                  <h4 className="font-bold text-emerald-800 mb-4">💰 Resumen de la Venta</h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-emerald-700">Total a cobrar:</span>
-                      <span className="text-2xl font-bold text-emerald-800">
-                        ${formatearNumero(((parseFloat(ventaActual.cantidad) || 0) * (parseFloat(ventaActual.precioVenta) || 0)).toFixed(0))}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-emerald-700">Utilidad total:</span>
-                      <span className="text-xl font-bold text-emerald-600">
-                        ${formatearNumero((((parseFloat(ventaActual.precioVenta) || 0) - (parseFloat(productos.find(p => p.id == ventaActual.productoId)?.costoCompra || '0') || 0)) * (parseFloat(ventaActual.cantidad) || 0)).toFixed(0))}
-                      </span>
+              {ventaActual.productoId && ventaActual.cantidad && ventaActual.precioVenta && (() => {
+                const productoSeleccionado = productos.find(p => p.id == ventaActual.productoId);
+                const cantidad = parseFloat(ventaActual.cantidad) || 0;
+                const precioVenta = parseFloat(ventaActual.precioVenta) || 0;
+                const costoUnitario = parseFloat(productoSeleccionado?.costoUnitario || productoSeleccionado?.costoCompra || '0') || 0;
+                
+                let totalVenta = cantidad * precioVenta;
+                let utilidadTotal = 0;
+                
+                if (ventaActual.tipoVenta === 'paquete' && productoSeleccionado?.esPaquete) {
+                  // Para venta por paquete, calcular utilidad del paquete completo
+                  const unidadesPorPaquete = parseFloat(productoSeleccionado.unidadesPorPaquete) || 1;
+                  const costoTotalPaquete = costoUnitario * unidadesPorPaquete;
+                  utilidadTotal = (precioVenta - costoTotalPaquete) * cantidad;
+                } else {
+                  // Para venta por unidad
+                  utilidadTotal = (precioVenta - costoUnitario) * cantidad;
+                }
+                
+                return (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6">
+                    <h4 className="font-bold text-emerald-800 mb-4">💰 Resumen de la Venta</h4>
+                    <div className="space-y-3">
+                      <div className="text-sm text-emerald-700 mb-2">
+                        Vendiendo: {cantidad} {ventaActual.tipoVenta === 'paquete' ? 'paquete(s)' : 'unidad(es)'}
+                        {ventaActual.tipoVenta === 'paquete' && productoSeleccionado?.esPaquete && (
+                          <span className="block text-xs">
+                            = {cantidad * (parseFloat(productoSeleccionado.unidadesPorPaquete) || 0)} unidades individuales
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-700">Total a cobrar:</span>
+                        <span className="text-2xl font-bold text-emerald-800">
+                          ${formatearNumero(totalVenta.toFixed(0))}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-emerald-700">Utilidad total:</span>
+                        <span className="text-xl font-bold text-emerald-600">
+                          ${formatearNumero(utilidadTotal.toFixed(0))}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
               
               <button
                 onClick={onRegistrarVenta}

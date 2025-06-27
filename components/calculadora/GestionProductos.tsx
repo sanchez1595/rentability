@@ -83,26 +83,62 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
               </div>
               
               {productoActual.esPaquete && (
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-amber-700 mb-2">
-                      Unidades por Paquete
-                    </label>
-                    <input
-                      type="text"
-                      value={formatearInput(productoActual.unidadesPorPaquete)}
-                      onChange={(e) => onCambioInput('unidadesPorPaquete', e.target.value)}
-                      className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
-                      placeholder="Ej: 6 pares"
-                    />
-                    <p className="text-xs text-amber-600 mt-1">
-                      ¿Cuántas unidades vienen en cada paquete que compras?
-                    </p>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-amber-700 mb-2">
+                        Cantidad de Paquetes
+                      </label>
+                      <input
+                        type="text"
+                        value={formatearInput(productoActual.cantidadPaquetes)}
+                        onChange={(e) => onCambioInput('cantidadPaquetes', e.target.value)}
+                        className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
+                        placeholder="Ej: 2 paquetes"
+                      />
+                      <p className="text-xs text-amber-600 mt-1">
+                        ¿Cuántos paquetes compraste?
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-amber-700 mb-2">
+                        Unidades por Paquete
+                      </label>
+                      <input
+                        type="text"
+                        value={formatearInput(productoActual.unidadesPorPaquete)}
+                        onChange={(e) => onCambioInput('unidadesPorPaquete', e.target.value)}
+                        className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
+                        placeholder="Ej: 6 pares"
+                      />
+                      <p className="text-xs text-amber-600 mt-1">
+                        ¿Cuántas unidades vienen en cada paquete que compras?
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-amber-100 border border-amber-300 rounded-lg p-3">
+                    <div className="text-sm font-medium text-amber-700 mb-1">
+                      Resumen de unidades
+                    </div>
+                    <div className="text-amber-800">
+                      <span className="font-bold">
+                        {(() => {
+                          const paquetes = parseFloat(productoActual.cantidadPaquetes) || 0;
+                          const unidades = parseFloat(productoActual.unidadesPorPaquete) || 0;
+                          return formatearInput((paquetes * unidades).toString());
+                        })()}
+                      </span> unidades totales
+                    </div>
+                    <div className="text-xs text-amber-600 mt-1">
+                      {productoActual.cantidadPaquetes || '0'} paquetes × {productoActual.unidadesPorPaquete || '0'} unidades
+                    </div>
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-amber-700 mb-2">
-                      Costo por Unidad
+                      Costo por Unidad Individual
                     </label>
                     <div className="px-3 py-2 bg-amber-100 border border-amber-300 rounded-lg text-amber-800 font-medium">
                       {productoActual.costoUnitario && parseFloat(productoActual.costoUnitario) > 0
@@ -110,7 +146,7 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
                         : 'Calculado automáticamente'}
                     </div>
                     <p className="text-xs text-amber-600 mt-1">
-                      Se calcula dividiendo el costo total entre las unidades
+                      Se calcula dividiendo el costo total entre todas las unidades
                     </p>
                   </div>
                 </div>
@@ -138,19 +174,29 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
             
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Stock Inicial {productoActual.esPaquete ? '(unidades individuales)' : ''}
+                Stock {productoActual.esPaquete ? '(calculado automáticamente)' : ''}
               </label>
-              <input
-                type="text"
-                value={formatearInput(productoActual.stock)}
-                onChange={(e) => onCambioInput('stock', e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder={productoActual.esPaquete ? `Ej: ${productoActual.unidadesPorPaquete || '6'} unidades` : "0"}
-                disabled={productoActual.esPaquete && !!productoActual.unidadesPorPaquete}
-              />
+              {productoActual.esPaquete ? (
+                <div className="px-4 py-3 bg-slate-100 border border-slate-300 rounded-xl text-slate-700 font-medium">
+                  {(() => {
+                    const paquetes = parseFloat(productoActual.cantidadPaquetes) || 0;
+                    const unidades = parseFloat(productoActual.unidadesPorPaquete) || 0;
+                    const total = paquetes * unidades;
+                    return total > 0 ? formatearInput(total.toString()) + ' unidades' : '0 unidades';
+                  })()}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={formatearInput(productoActual.stock)}
+                  onChange={(e) => onCambioInput('stock', e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="0"
+                />
+              )}
               {productoActual.esPaquete && (
                 <p className="text-xs text-slate-500 mt-1">
-                  Se establecerá automáticamente al número de unidades por paquete
+                  Stock total calculado: {productoActual.cantidadPaquetes || '0'} paquetes × {productoActual.unidadesPorPaquete || '0'} unidades
                 </p>
               )}
             </div>
@@ -159,7 +205,7 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Costo de Compra ($)
+                Costo de Compra Total ($)
               </label>
               <input
                 type="text"
@@ -168,6 +214,11 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="0"
               />
+              {productoActual.esPaquete && productoActual.cantidadPaquetes && parseFloat(productoActual.cantidadPaquetes) > 0 && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Costo total por {productoActual.cantidadPaquetes} paquete{parseFloat(productoActual.cantidadPaquetes) > 1 ? 's' : ''}
+                </p>
+              )}
             </div>
             
             <div>
@@ -255,28 +306,50 @@ export const GestionProductos: React.FC<GestionProductosProps> = ({
           {/* Información de Paquete */}
           {productoActual.esPaquete && productoActual.unidadesPorPaquete && parseFloat(productoActual.unidadesPorPaquete) > 1 && (
             <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-              <div className="text-sm font-medium text-amber-700 mb-2">División por Paquete</div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-amber-600">Costo del paquete:</span>
-                  <div className="font-bold text-amber-800">
+              <div className="text-sm font-medium text-amber-700 mb-2">Análisis de Costos por Paquete</div>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-amber-600">Cantidad de paquetes:</span>
+                    <div className="font-bold text-amber-800">
+                      {productoActual.cantidadPaquetes || '0'} paquete{parseFloat(productoActual.cantidadPaquetes || '0') !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-amber-600">Unidades por paquete:</span>
+                    <div className="font-bold text-amber-800">
+                      {formatearInput(productoActual.unidadesPorPaquete)} unidades
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t border-amber-300 pt-3">
+                  <div className="text-amber-600 text-sm mb-1">Costo total de la compra:</div>
+                  <div className="font-bold text-amber-800 text-lg">
                     {productoActual.costoCompra && parseFloat(productoActual.costoCompra) > 0
                       ? `$${formatearNumero(parseFloat(productoActual.costoCompra).toFixed(0))}`
                       : '-'}
                   </div>
+                  {productoActual.cantidadPaquetes && parseFloat(productoActual.cantidadPaquetes) > 0 && (
+                    <div className="text-xs text-amber-600 mt-1">
+                      Por {productoActual.cantidadPaquetes} paquete{parseFloat(productoActual.cantidadPaquetes) > 1 ? 's' : ''}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <span className="text-amber-600">Unidades:</span>
-                  <div className="font-bold text-amber-800">
-                    {formatearInput(productoActual.unidadesPorPaquete)} unidades
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-amber-600">Costo por unidad:</span>
-                  <div className="font-bold text-amber-800 text-lg">
+                
+                <div className="border-t border-amber-300 pt-3">
+                  <div className="text-amber-600 text-sm mb-1">Costo por unidad individual:</div>
+                  <div className="font-bold text-amber-800 text-xl">
                     {productoActual.costoUnitario && parseFloat(productoActual.costoUnitario) > 0
                       ? `$${formatearNumero(parseFloat(productoActual.costoUnitario).toFixed(0))}`
                       : '-'}
+                  </div>
+                  <div className="text-xs text-amber-600 mt-1">
+                    Total unidades: {(() => {
+                      const paquetes = parseFloat(productoActual.cantidadPaquetes) || 0;
+                      const unidades = parseFloat(productoActual.unidadesPorPaquete) || 0;
+                      return paquetes * unidades;
+                    })()}
                   </div>
                 </div>
               </div>

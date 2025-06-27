@@ -15,6 +15,7 @@ export interface Producto {
   esPaquete: boolean;
   unidadesPorPaquete: string;
   costoUnitario: string;
+  cantidadPaquetes: string;
 }
 
 export interface Venta {
@@ -29,6 +30,7 @@ export interface Venta {
   metodoPago: string;
   utilidadTotal: number;
   ingresoTotal: number;
+  tipoVenta: 'unidad' | 'paquete';
 }
 
 export interface VentaActual {
@@ -38,6 +40,7 @@ export interface VentaActual {
   fecha: string;
   cliente: string;
   metodoPago: string;
+  tipoVenta: 'unidad' | 'paquete';
 }
 
 export interface ProductoActual {
@@ -56,6 +59,7 @@ export interface ProductoActual {
   esPaquete: boolean;
   unidadesPorPaquete: string;
   costoUnitario: string;
+  cantidadPaquetes: string;
 }
 
 export interface Metas {

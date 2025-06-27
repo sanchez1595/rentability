@@ -169,7 +169,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       // Actualizar stock del producto
       const producto = productos.find(p => p.id === venta.productoId);
       if (producto) {
-        const nuevoStock = parseInt(producto.stock) - venta.cantidad;
+        let unidadesVendidas = venta.cantidad;
+        
+        // Si es venta por paquete, multiplicar por unidades del paquete
+        if (venta.tipoVenta === 'paquete' && producto.esPaquete && producto.unidadesPorPaquete) {
+          unidadesVendidas = venta.cantidad * parseFloat(producto.unidadesPorPaquete);
+        }
+        
+        const nuevoStock = parseInt(producto.stock) - unidadesVendidas;
         await actualizarProducto(venta.productoId, { 
           stock: nuevoStock.toString(),
           fechaUltimaVenta: venta.fecha

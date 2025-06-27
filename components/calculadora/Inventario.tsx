@@ -93,7 +93,10 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                     Stock
                   </th>
                   <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Costo
+                    Costo Unit.
+                  </th>
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Costo Paq.
                   </th>
                   <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Precio
@@ -174,9 +177,23 @@ export const Inventario: React.FC<InventarioProps> = ({ productos, onEditarProdu
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         ${formatearNumero(costoReal)}
                         {producto.esPaquete && (
-                          <div className="text-xs text-amber-600">
+                          <div className="text-xs text-gray-500">
                             Por unidad
                           </div>
+                        )}
+                      </td>
+                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
+                        {producto.esPaquete && producto.unidadesPorPaquete ? (
+                          <div>
+                            <div className="font-medium text-amber-600">
+                              ${formatearNumero((costoReal * parseFloat(producto.unidadesPorPaquete)).toFixed(0))}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              x{producto.unidadesPorPaquete} unid.
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
                         )}
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
