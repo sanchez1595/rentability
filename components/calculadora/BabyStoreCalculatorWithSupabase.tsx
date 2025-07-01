@@ -294,6 +294,46 @@ export const BabyStoreCalculatorWithSupabase = () => {
     }
   };
 
+  const actualizarTodosLosPrecios = async () => {
+    try {
+      const productosActualizados = productos.map(producto => {
+        const { precioVenta, utilidad, costoUnitario } = calcularPrecios({
+          ...producto,
+          costoCompra: producto.costoCompra,
+          margenDeseado: producto.margenDeseado,
+          esPaquete: producto.esPaquete,
+          unidadesPorPaquete: producto.unidadesPorPaquete,
+          cantidadPaquetes: producto.cantidadPaquetes
+        }, configuracion);
+
+        return {
+          ...producto,
+          precioVenta,
+          utilidad,
+          costoUnitario,
+          gastosFijos: ((Object.values(configuracion.costosFijos).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0) + 
+                       Object.values(configuracion.herramientas).reduce((sum, val) => sum + (parseFloat(val.toString()) || 0), 0)) / 
+                       (configuracion.ventasEstimadas || 1)).toFixed(0)
+        };
+      });
+
+      // Actualizar todos los productos en lote
+      await Promise.all(
+        productosActualizados.map(producto => 
+          actualizarProducto(producto.id, {
+            precioVenta: producto.precioVenta,
+            utilidad: producto.utilidad,
+            gastosFijos: producto.gastosFijos,
+            costoUnitario: producto.costoUnitario
+          })
+        )
+      );
+    } catch (error) {
+      console.error('Error actualizando precios:', error);
+      throw error;
+    }
+  };
+
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
     { id: 'ventas', label: 'Ventas', icon: ShoppingCart, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
@@ -379,6 +419,7 @@ export const BabyStoreCalculatorWithSupabase = () => {
             onActualizarConfiguracion={actualizarConfiguracionHandler}
             onActualizarMetas={actualizarMetasHandler}
             onActualizarAlertas={actualizarAlertasHandler}
+            onActualizarTodosLosPrecios={actualizarTodosLosPrecios}
           />
         );
       

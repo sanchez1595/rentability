@@ -132,6 +132,19 @@ export const productosService = {
       .eq('id', id);
     
     if (error) throw error;
+  },
+
+  async actualizarTodosLosPrecios(productos: Producto[], configuracion: Configuracion): Promise<void> {
+    const { error } = await supabase
+      .from('productos')
+      .upsert(productos.map(producto => ({
+        id: producto.id,
+        precio_venta: parseFloat(producto.precioVenta) || 0,
+        utilidad: parseFloat(producto.utilidad) || 0,
+        gastos_fijos: parseFloat(producto.gastosFijos) || 0
+      })), { onConflict: 'id' });
+    
+    if (error) throw error;
   }
 };
 

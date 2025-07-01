@@ -1,5 +1,5 @@
-import React from 'react';
-import { Settings, Plus, Trash2, Target, AlertTriangle, DollarSign, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, Plus, Trash2, Target, AlertTriangle, DollarSign, X, RefreshCw } from 'lucide-react';
 import { Configuracion as ConfiguracionType, Metas, Alertas } from '../../types';
 import { formatearInput, formatearMoneda } from '../../utils/formatters';
 import { useNumericInput } from '../../hooks/useNumericInput';
@@ -11,6 +11,7 @@ interface ConfiguracionProps {
   onActualizarConfiguracion: (config: Partial<ConfiguracionType>) => void;
   onActualizarMetas: (metas: Partial<Metas>) => void;
   onActualizarAlertas: (alertas: Partial<Alertas>) => void;
+  onActualizarTodosLosPrecios?: () => Promise<void>;
 }
 
 export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
@@ -19,9 +20,11 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
   alertas,
   onActualizarConfiguracion,
   onActualizarMetas,
-  onActualizarAlertas
+  onActualizarAlertas,
+  onActualizarTodosLosPrecios
 }) => {
   const { manejarCambioNumerico } = useNumericInput();
+  const [actualizandoPrecios, setActualizandoPrecios] = useState(false);
 
   const actualizarCostoFijo = (key: string, valor: string) => {
     manejarCambioNumerico(valor, (valorLimpio) => {
@@ -130,6 +133,30 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
     }
   };
 
+  const manejarActualizacionMasiva = async () => {
+    if (!onActualizarTodosLosPrecios) return;
+    
+    const confirmar = confirm(
+      '¿Estás seguro de actualizar TODOS los precios de TODOS los productos?\n\n' +
+      'Esta acción recalculará los precios de venta de todos los productos ' +
+      'basándose en la configuración actual de costos fijos, herramientas y porcentajes operativos.\n\n' +
+      'Los nuevos precios se guardarán automáticamente.'
+    );
+    
+    if (!confirmar) return;
+    
+    try {
+      setActualizandoPrecios(true);
+      await onActualizarTodosLosPrecios();
+      alert('✅ Todos los precios han sido actualizados exitosamente');
+    } catch (error) {
+      console.error('Error al actualizar precios:', error);
+      alert('❌ Error al actualizar los precios. Por favor intenta de nuevo.');
+    } finally {
+      setActualizandoPrecios(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Ventas Estimadas */}
@@ -161,7 +188,20 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
         </div>
 
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mt-6">
-          <h4 className="font-semibold text-indigo-800 mb-3">📊 Resumen de Configuración</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-indigo-800">📊 Resumen de Configuración</h4>
+            {onActualizarTodosLosPrecios && (
+              <button
+                onClick={manejarActualizacionMasiva}
+                disabled={actualizandoPrecios}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                title="Actualizar todos los precios con la configuración actual"
+              >
+                <RefreshCw className={`w-4 h-4 ${actualizandoPrecios ? 'animate-spin' : ''}`} />
+                <span>{actualizandoPrecios ? 'Actualizando...' : 'Actualizar Todos los Precios'}</span>
+              </button>
+            )}
+          </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-600">Costos Fijos Totales:</span>
@@ -191,6 +231,14 @@ export const ConfiguracionComponent: React.FC<ConfiguracionProps> = ({
               </span>
             </div>
           </div>
+          {onActualizarTodosLosPrecios && (
+            <div className="bg-emerald-100 border border-emerald-300 rounded-lg p-3 mt-4">
+              <div className="text-sm text-emerald-800">
+                <div className="font-semibold mb-1">💡 Actualización Masiva de Precios</div>
+                <div>Cuando modifiques costos fijos, herramientas o porcentajes, usa el botón de arriba para actualizar automáticamente todos los precios de tus productos.</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
